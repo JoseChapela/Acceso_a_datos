@@ -1,6 +1,6 @@
 package actividad_2;
 
-public class Main {
+public class Main2 {
     //EJERCICIO 1--------------------------------------------------------------------
     final static String [] ORIGEN_1={"exercicio5-1","file.txt","file3.txt","file2.txt"};
     final static String DESTINO_1="Salida.txt";

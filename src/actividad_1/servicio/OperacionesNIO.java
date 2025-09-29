@@ -13,10 +13,6 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 public class OperacionesNIO {
-    public static void main(String[] args)
-            throws DirectorioNoExisteException, NoEsDirectorioException, IOException {
-        recorrerRecursivo2("D:\\pruebaAC");
-    }
 
     public static void borrar(String ruta)
             throws ArchivoNoExisteException, IOException {
@@ -27,6 +23,7 @@ public class OperacionesNIO {
             try {
                 Files.delete(path);
                 System.out.println("Se ha borrado el archivo "+path);
+                return;
             } catch (IOException e) {
                 System.out.println("Error al borrar el archivo "+path);
             }
@@ -61,6 +58,10 @@ public class OperacionesNIO {
     public static void copiarDirectorio(String origen, String destino) throws IOException {
         Path origenPath = Paths.get(origen);
         Path destinoPath = Paths.get(destino);
+        if(!Files.isDirectory(origenPath)){
+            System.out.println("El archivo de origen no es un directorio");
+            return;
+        }
         if (!Files.exists(destinoPath))
             Files.createDirectories(destinoPath);
         Files.walkFileTree(origenPath, new SimpleFileVisitor<>() {
@@ -69,21 +70,55 @@ public class OperacionesNIO {
                 Files.copy(file, destinoPath.resolve(origenPath.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
                 return FileVisitResult.CONTINUE;
             }
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Files.createDirectories(destinoPath.resolve(origenPath.relativize(dir)));
+                return FileVisitResult.CONTINUE;
+            }
         });
     }
 
     public static void moverArchivo(String origen, String destino)
             throws IOException, ArchivoNoExisteException, NoEsArchivoException {
-        File file = new File(origen);
-        Utilidades.validarArchivo(file);
-        Files.move(Paths.get(origen), Paths.get(destino), StandardCopyOption.REPLACE_EXISTING);
+        File fileorigen = new File(origen);
+        File filedestino = new File(destino);
+        Utilidades.validarArchivo(fileorigen);
+        if(!filedestino.mkdirs())
+            System.out.println("Error al crear el directorio "+destino);
+        Path destinoPath = Paths.get(destino);
+        Path origenPath = Paths.get(origen);
+        if (!Files.isDirectory(destinoPath))
+            Files.move(origenPath, destinoPath);
+        else
+            Files.move(origenPath, destinoPath.resolve(origenPath.getFileName()));
     }
 
     public static void copiarArchivo(String origen, String destino)
             throws IOException, ArchivoNoExisteException, NoEsArchivoException {
-        File file = new File(origen);
-        Utilidades.validarArchivo(file);
-        Files.copy(Paths.get(origen), Paths.get(destino), StandardCopyOption.REPLACE_EXISTING);
+        File fileorigen = new File(origen);
+        File filedestino = new File(destino);
+        Utilidades.validarArchivo(fileorigen);
+        if(!filedestino.mkdirs())
+            System.out.println("Error al crear el directorio "+destino);
+        Path destinoPath = Paths.get(destino);
+        Path origenPath = Paths.get(origen);
+        if (!Files.isDirectory(destinoPath))
+            Files.copy(origenPath, destinoPath, StandardCopyOption.REPLACE_EXISTING);
+        else
+            Files.copy(origenPath, destinoPath.resolve(origenPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    public static void filtrarPorSubcadena(String ruta, String subcadena)
+            throws DirectorioNoExisteException, NoEsDirectorioException, IOException {
+        Path dir =  Paths.get(ruta);
+        Utilidades.esDirectorio(dir.toFile());
+        try(Stream<Path> stream = Files.walk(dir)){
+            stream.filter((path) -> Files.isRegularFile(path)&&Files.isReadable(path)&&path.toString().toLowerCase().contains(subcadena))
+                    .forEach((path) -> Utilidades.mostrarInformacionFichero(path.toFile(), "---"));
+        }catch(AccessDeniedException e){
+            System.out.println("No se pudo acceder al directorio");
+        }
     }
 
     public static void filtrarPorExtensionYOrdenar(String ruta, String extension, boolean descendente)
@@ -102,25 +137,6 @@ public class OperacionesNIO {
         }
     }
 
-    //NO RECURSIVO (También se podía hacer con Files.list())
-    public static void filtrarPorExtension2(String ruta, String extension)
-            throws DirectorioNoExisteException, NoEsDirectorioException, IOException {
-        Path dir =  Paths.get(ruta);
-        Utilidades.esDirectorio(dir.toFile());
-        try(DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*."+extension)){
-            boolean encontrado = false;
-            for(Path path: stream){
-                Utilidades.mostrarInformacionFichero(path.toFile());
-                encontrado = true;
-            }
-            if(!encontrado){
-                System.out.println("No se encontraron archivos");
-            }
-        }catch(AccessDeniedException e){
-            System.out.println("No se pudo acceder al directorio");
-        }
-    }
-
     //RECURSIVO
     public static void filtrarPorExtension(String ruta, String extension)
             throws DirectorioNoExisteException, NoEsDirectorioException, IOException {
@@ -132,36 +148,6 @@ public class OperacionesNIO {
         }catch(AccessDeniedException e){
             System.out.println("No se pudo acceder al directorio");
         }
-    }
-
-    public static void recorrerRecursivo2(String ruta)
-            throws IOException {
-        Path dir = Paths.get(ruta);
-        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                Utilidades.mostrarInformacionFichero(file.toFile(), Utilidades.calcularSangria(dir, file));
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                Utilidades.mostrarInformacionFichero(dir.toFile(), Utilidades.calcularSangria(Paths.get(ruta), dir));
-                return FileVisitResult.CONTINUE;
-            }
-
-            //COGE DIRECTORIOS Y ARCHIVOS -- LOS ANTERIORES SOLO UNO
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) {
-                System.err.println("Error al visitar el directorio: " + file.toAbsolutePath() + " --> " + exc.getMessage());
-                return FileVisitResult.CONTINUE;
-            }
-        });
     }
 
     public static void recorrerRecursivo(String ruta)
@@ -213,6 +199,54 @@ public class OperacionesNIO {
         }catch(IOException e){
             System.out.println(e.getMessage());
         }
-        */
+
+        public static void recorrerRecursivo2(String ruta)
+            throws IOException {
+            Path dir = Paths.get(ruta);
+            Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    Utilidades.mostrarInformacionFichero(file.toFile(), Utilidades.calcularSangria(dir, file));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                    Utilidades.mostrarInformacionFichero(dir.toFile(), Utilidades.calcularSangria(Paths.get(ruta), dir));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                //COGE DIRECTORIOS Y ARCHIVOS -- LOS ANTERIORES SOLO UNO
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                    System.err.println("Error al visitar el directorio: " + file.toAbsolutePath() + " --> " + exc.getMessage());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
+
+        public static void filtrarPorExtension2(String ruta, String extension)
+            throws DirectorioNoExisteException, NoEsDirectorioException, IOException {
+            Path dir =  Paths.get(ruta);
+            Utilidades.esDirectorio(dir.toFile());
+            try(DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*."+extension)){
+                boolean encontrado = false;
+                for(Path path: stream){
+                    Utilidades.mostrarInformacionFichero(path.toFile());
+                    encontrado = true;
+                }
+                if(!encontrado){
+                    System.out.println("No se encontraron archivos");
+                }
+            }catch(AccessDeniedException e){
+                System.out.println("No se pudo acceder al directorio");
+            }
+        }
+    */
     }
 }

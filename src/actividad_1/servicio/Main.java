@@ -1,14 +1,11 @@
 package actividad_1.servicio;
 
 import actividad_1.excepciones.ArchivoNoExisteException;
-import actividad_1.excepciones.DirectorioNoExisteException;
 import actividad_1.excepciones.NoEsArchivoException;
-import actividad_1.excepciones.NoEsDirectorioException;
-import actividad_2.Operaciones;
 
 import java.io.IOException;
 
-public class Main1 {
+public class Main {
 
     final static String EJERCICIO_1="src/recursos_1";
     final static String EJERCICIO_6_ORIGEN="src/recursos_1/file1.txt";

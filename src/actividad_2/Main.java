@@ -1,6 +1,6 @@
 package actividad_2;
 
-public class Main2 {
+public class Main {
     //EJERCICIO 1--------------------------------------------------------------------
     final static String [] ORIGEN_1={"exercicio5-1","file.txt","file3.txt","file2.txt"};
     final static String DESTINO_1="Salida.txt";
@@ -20,9 +20,9 @@ public class Main2 {
          //Operaciones.crearDirectoriosConFormato(ORIGEN_2,DESTINO_2);
 
         //EJERCICIO3
-        //Pattern p = Pattern.compile ("\\b" + Pattern.quote(palabra)+"\\b, ..."), Matcher m = p.matcher, while (m.find())
         //Operaciones.palabraPorLinea(ORIGEN_3,PALABRA_3,DESTINO_3);
 
+        //EJERCICIO_EXTRA
         Operaciones.VecesPorPalabra(ORIGEN_3);
     }
 }

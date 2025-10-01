@@ -5,8 +5,8 @@ import java.io.*;
 public class EscrituraObjetos extends Archivo{
 
     //ATRIBUTOS
-    ObjectOutputStream out1;
-    OutputAux out2;
+    ObjectOutputStream out1=null;
+    OutputAux out2=null;
     boolean primeraEscritura=true;
 
     //CONSTRUCTORES
@@ -15,50 +15,46 @@ public class EscrituraObjetos extends Archivo{
     }
 
     //MÉTODOS
+
     @Override
     public void abrirArchivo() {
         try {
-            out2 = new OutputAux(new FileOutputStream(file, true));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("No existe el archivo");
+            if(file.exists()) {
+                out2 = new OutputAux(new FileOutputStream(file, true));
+                primeraEscritura=false;
+            }
+            else
+                out1 = new ObjectOutputStream(new FileOutputStream(file));
         } catch (IOException e) {
-            throw new RuntimeException("No se ha podido abrir el archivo");
-        }
-        primeraEscritura=false;
-    }
-
-    public void crearArchivo() {
-        try {
-            out1 = new ObjectOutputStream(new FileOutputStream(file));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("No existe el archivo");
-        } catch (IOException e) {
-            throw new RuntimeException("No se ha podido abrir el archivo");
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void cerrarArchivo() {
-        if (out1 != null) {
-            try {
+        try {
+            if (out1 != null)
                 out1.close();
-            } catch (IOException e) {
-                throw new RuntimeException("No se ha podido cerrar el archivo");
-            }
+            if (out2 != null)
+                out2.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void escribirObjetos(Object objeto){
-
+        public void escribirObjeto(Object objeto){
         try {
-            if(primeraEscritura){
+            if (primeraEscritura) {
                 out1.writeObject(objeto);
+                out1.close();
+                out1=null;
                 primeraEscritura=false;
-            }else {
+                abrirArchivo();
+            } else {
                 out2.writeObject(objeto);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Error al leer el objeto");
+        }catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

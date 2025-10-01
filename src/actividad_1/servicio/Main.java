@@ -7,9 +7,9 @@ import java.io.IOException;
 
 public class Main {
 
-    final static String EJERCICIO_1="src/recursos_1";
-    final static String EJERCICIO_6_ORIGEN="src/recursos_1/file1.txt";
-    final static String EJERCICIO_6_DESTINO="src/recursos_1/directorio1/filenueva.txt";
+    final static String EJERCICIO_1="src/actividad_2/recursos_1";
+    final static String EJERCICIO_6_ORIGEN="src/actividad_2/recursos_1/file1.txt";
+    final static String EJERCICIO_6_DESTINO="src/actividad_2/recursos_1/directorio1/filenueva.txt";
 
 
     public static void main(String[] args)

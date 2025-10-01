@@ -38,7 +38,7 @@ public class LecturaObjetos extends Archivo{
         }
     }
 
-    public Object getObjetos(){
+    public Object getObjet(){
 
         try {
             return in.readObject();

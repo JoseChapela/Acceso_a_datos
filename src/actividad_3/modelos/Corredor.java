@@ -9,15 +9,17 @@ public class Corredor {
     String nombre;
     LocalDate fechaNacimiento;
     int equipo;
+    List<Puntuacion> puntuaciones;
+    final static long SERIAL_NUMBER=1L;
 
-    public Corredor(String nombre, LocalDate fechaNacimiento, int equipo, List<Puntuacion> puntuaciones) {
+    public Corredor(String nombre, LocalDate fechaNacimiento, int equipo) {
         this.nombre = nombre;
         this.fechaNacimiento = fechaNacimiento;
         this.equipo = equipo;
-        this.puntuaciones = puntuaciones;
     }
 
-    List<Puntuacion> puntuaciones;
-
-    final static long SERIAL_NUMBER=1L;
+    @Override
+    public String toString() {
+        return nombre+" -> "+dorsal;
+    }
 }

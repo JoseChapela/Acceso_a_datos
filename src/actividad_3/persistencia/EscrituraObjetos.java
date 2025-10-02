@@ -19,12 +19,16 @@ public class EscrituraObjetos extends Archivo{
     @Override
     public void abrirArchivo() {
         try {
-            if(file.exists()) {
+            if(!file.exists()) {
+                primeraEscritura=true;
+                out1 = new ObjectOutputStream(new FileOutputStream(file));
+            }
+            else if(primeraEscritura)
+                out1 = new ObjectOutputStream(new FileOutputStream(file));
+            else {
                 out2 = new OutputAux(new FileOutputStream(file, true));
                 primeraEscritura=false;
             }
-            else
-                out1 = new ObjectOutputStream(new FileOutputStream(file));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -33,8 +37,6 @@ public class EscrituraObjetos extends Archivo{
     @Override
     public void cerrarArchivo() {
         try {
-            if (out1 != null)
-                out1.close();
             if (out2 != null)
                 out2.close();
         } catch (IOException e) {
@@ -47,7 +49,6 @@ public class EscrituraObjetos extends Archivo{
             if (primeraEscritura) {
                 out1.writeObject(objeto);
                 out1.close();
-                out1=null;
                 primeraEscritura=false;
                 abrirArchivo();
             } else {
